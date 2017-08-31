@@ -4,8 +4,6 @@ import com.codahale.metrics.JmxReporter
 import net.corda.core.concurrent.CordaFuture
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.PartyAndCertificate
-import net.corda.core.internal.concurrent.doneFuture
-import net.corda.core.internal.concurrent.flatMap
 import net.corda.core.internal.concurrent.openFuture
 import net.corda.core.internal.concurrent.thenMatch
 import net.corda.core.internal.uncheckedCast
@@ -158,6 +156,7 @@ open class Node(override val configuration: FullNodeConfiguration,
                 database,
                 nodeReadyFuture,
                 services.monitoringService,
+                services.networkMapCache,
                 advertisedAddress)
     }
 
@@ -254,15 +253,6 @@ open class Node(override val configuration: FullNodeConfiguration,
 
         // Start up the MQ client.
         (network as NodeMessagingClient).start(rpcOps, userService)
-    }
-
-    /**
-     * Insert an initial step in the registration process which will throw an exception if a non-recoverable error is
-     * encountered when trying to connect to the network map node.
-     */
-    override fun registerWithNetworkMap(): CordaFuture<Unit> {
-        val networkMapConnection = messageBroker?.networkMapConnectionFuture ?: doneFuture(Unit)
-        return networkMapConnection.flatMap { super.registerWithNetworkMap() }
     }
 
     override fun myAddresses(): List<NetworkHostAndPort> {
