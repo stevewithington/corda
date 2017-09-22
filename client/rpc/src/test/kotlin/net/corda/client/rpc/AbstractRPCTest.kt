@@ -35,7 +35,7 @@ open class AbstractRPCTest {
     inline fun <reified I : RPCOps> RPCDriverExposedDSLInterface.testProxy(
             ops: I,
             rpcUser: User = rpcTestUser,
-            clientConfiguration: RPCClientConfiguration = RPCClientConfiguration.default,
+            clientConfiguration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT,
             serverConfiguration: RPCServerConfiguration = RPCServerConfiguration.default
     ): TestProxy<I> {
         return when (mode) {

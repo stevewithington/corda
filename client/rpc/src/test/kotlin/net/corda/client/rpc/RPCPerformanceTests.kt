@@ -54,7 +54,7 @@ class RPCPerformanceTests : AbstractRPCTest() {
     private fun warmup() {
         rpcDriver {
             val proxy = testProxy(
-                    RPCClientConfiguration.default,
+                    RPCClientConfiguration.DEFAULT,
                     RPCServerConfiguration.default
             )
             val executor = Executors.newFixedThreadPool(4)
@@ -84,7 +84,7 @@ class RPCPerformanceTests : AbstractRPCTest() {
         measure(inputOutputSizes, (1..5)) { inputOutputSize, _ ->
             rpcDriver {
                 val proxy = testProxy(
-                        RPCClientConfiguration.default.copy(
+                        RPCClientConfiguration.DEFAULT.copy(
                                 cacheConcurrencyLevel = 16,
                                 observationExecutorPoolSize = 2,
                                 producerPoolBound = 2
@@ -127,7 +127,7 @@ class RPCPerformanceTests : AbstractRPCTest() {
         rpcDriver {
             val metricRegistry = startReporter(shutdownManager)
             val proxy = testProxy(
-                    RPCClientConfiguration.default.copy(
+                    RPCClientConfiguration.DEFAULT.copy(
                             reapInterval = 1.seconds,
                             cacheConcurrencyLevel = 16,
                             producerPoolBound = 8
@@ -161,7 +161,7 @@ class RPCPerformanceTests : AbstractRPCTest() {
         measure(listOf(1)) { clientParallelism -> // TODO this hangs with more parallelism
             rpcDriver {
                 val proxy = testProxy(
-                        RPCClientConfiguration.default,
+                        RPCClientConfiguration.DEFAULT,
                         RPCServerConfiguration.default.copy(
                                 consumerPoolSize = 1
                         )

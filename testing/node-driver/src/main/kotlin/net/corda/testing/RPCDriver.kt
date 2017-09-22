@@ -78,7 +78,7 @@ interface RPCDriverExposedDSLInterface : DriverDSLExposedInterface {
             rpcOpsClass: Class<I>,
             username: String = rpcTestUser.username,
             password: String = rpcTestUser.password,
-            configuration: RPCClientConfiguration = RPCClientConfiguration.default
+            configuration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT
     ): CordaFuture<I>
 
     /**
@@ -126,7 +126,7 @@ interface RPCDriverExposedDSLInterface : DriverDSLExposedInterface {
             rpcAddress: NetworkHostAndPort,
             username: String = rpcTestUser.username,
             password: String = rpcTestUser.password,
-            configuration: RPCClientConfiguration = RPCClientConfiguration.default
+            configuration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT
     ): CordaFuture<I>
 
     /**
@@ -182,7 +182,7 @@ interface RPCDriverExposedDSLInterface : DriverDSLExposedInterface {
 inline fun <reified I : RPCOps> RPCDriverExposedDSLInterface.startInVmRpcClient(
         username: String = rpcTestUser.username,
         password: String = rpcTestUser.password,
-        configuration: RPCClientConfiguration = RPCClientConfiguration.default
+        configuration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT
 ) = startInVmRpcClient(I::class.java, username, password, configuration)
 inline fun <reified I : RPCOps> RPCDriverExposedDSLInterface.startRandomRpcClient(
         hostAndPort: NetworkHostAndPort,
@@ -193,7 +193,7 @@ inline fun <reified I : RPCOps> RPCDriverExposedDSLInterface.startRpcClient(
         rpcAddress: NetworkHostAndPort,
         username: String = rpcTestUser.username,
         password: String = rpcTestUser.password,
-        configuration: RPCClientConfiguration = RPCClientConfiguration.default
+        configuration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT
 ) = startRpcClient(I::class.java, rpcAddress, username, password, configuration)
 
 interface RPCDriverInternalDSLInterface : DriverDSLInternalInterface, RPCDriverExposedDSLInterface

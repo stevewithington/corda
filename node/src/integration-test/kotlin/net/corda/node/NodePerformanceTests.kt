@@ -12,9 +12,9 @@ import net.corda.finance.DOLLARS
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.finance.flows.CashPaymentFlow
 import net.corda.node.services.FlowPermissions.Companion.startFlowPermission
-import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.node.services.transactions.SimpleNotaryService
 import net.corda.nodeapi.User
+import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.testing.chooseIdentity
 import net.corda.testing.driver.NodeHandle
 import net.corda.testing.driver.driver
@@ -61,7 +61,7 @@ class NodePerformanceTests {
         driver(startNodesInProcess = true) {
             val a = startNode(rpcUsers = listOf(User("A", "A", setOf(startFlowPermission<EmptyFlow>())))).get()
 
-            a.rpcClientToNode().use("A", "A") { connection ->
+            a.rpcClientToNode().start("A", "A").use { connection ->
                 val timings = Collections.synchronizedList(ArrayList<Long>())
                 val N = 10000
                 val overallTiming = Stopwatch.createStarted().apply {
@@ -92,7 +92,7 @@ class NodePerformanceTests {
             val a = startNode(rpcUsers = listOf(User("A", "A", setOf(startFlowPermission<EmptyFlow>())))).get()
             a as NodeHandle.InProcess
             val metricRegistry = startReporter(shutdownManager, a.node.services.monitoringService.metrics)
-            a.rpcClientToNode().use("A", "A") { connection ->
+            a.rpcClientToNode().start("A", "A").use { connection ->
                 startPublishingFixedRateInjector(metricRegistry, 8, 5.minutes, 2000L / TimeUnit.SECONDS) {
                     connection.proxy.startFlow(::EmptyFlow).returnValue.get()
                 }
@@ -109,7 +109,7 @@ class NodePerformanceTests {
             ).get()
             a as NodeHandle.InProcess
             val metricRegistry = startReporter(shutdownManager, a.node.services.monitoringService.metrics)
-            a.rpcClientToNode().use("A", "A") { connection ->
+            a.rpcClientToNode().start("A", "A").use { connection ->
                 val notary = connection.proxy.notaryIdentities().first()
                 println("ISSUING")
                 val doneFutures = (1..100).toList().parallelStream().map {

@@ -77,7 +77,7 @@ class RPCStabilityTests {
                 val server = startRpcServer<RPCOps>(ops = DummyOps)
                 Try.on { startRpcClient<RPCOps>(
                         server.get().broker.hostAndPort!!,
-                        configuration = RPCClientConfiguration.default.copy(minimumServerProtocolVersion = 1)
+                        configuration = RPCClientConfiguration.DEFAULT.copy(minimumServerProtocolVersion = 1)
                 ).get() }
             }
         }
@@ -219,7 +219,7 @@ class RPCStabilityTests {
             val serverPort = startRpcServer<ReconnectOps>(ops = ops).getOrThrow().broker.hostAndPort!!
             serverFollower.unfollow()
             // Set retry interval to 1s to reduce test duration
-            val clientConfiguration = RPCClientConfiguration.default.copy(connectionRetryInterval = 1.seconds)
+            val clientConfiguration = RPCClientConfiguration.DEFAULT.copy(connectionRetryInterval = 1.seconds)
             val clientFollower = shutdownManager.follower()
             val client = startRpcClient<ReconnectOps>(serverPort, configuration = clientConfiguration).getOrThrow()
             clientFollower.unfollow()

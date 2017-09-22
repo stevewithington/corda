@@ -60,9 +60,9 @@ data class RPCClientConfiguration(
         val maxFileSize: Int
 ) {
     companion object {
-        val unlimitedReconnectAttempts = -1
+        private const val unlimitedReconnectAttempts = -1
         @JvmStatic
-        val default = RPCClientConfiguration(
+        val DEFAULT = RPCClientConfiguration(
                 minimumServerProtocolVersion = 0,
                 trackRpcCallSites = false,
                 reapInterval = 1.seconds,
@@ -87,13 +87,13 @@ data class RPCClientConfiguration(
  */
 class RPCClient<I : RPCOps>(
         val transport: TransportConfiguration,
-        val rpcConfiguration: RPCClientConfiguration = RPCClientConfiguration.default,
+        val rpcConfiguration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT,
         val serializationContext: SerializationContext = SerializationDefaults.RPC_CLIENT_CONTEXT
 ) {
     constructor(
             hostAndPort: NetworkHostAndPort,
             sslConfiguration: SSLConfiguration? = null,
-            configuration: RPCClientConfiguration = RPCClientConfiguration.default,
+            configuration: RPCClientConfiguration = RPCClientConfiguration.DEFAULT,
             serializationContext: SerializationContext = SerializationDefaults.RPC_CLIENT_CONTEXT
     ) : this(tcpTransport(ConnectionDirection.Outbound(), hostAndPort, sslConfiguration), configuration, serializationContext)
 

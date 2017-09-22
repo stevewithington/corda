@@ -86,7 +86,7 @@ class RPCConcurrencyTests : AbstractRPCTest() {
         testOpsImpl = TestOpsImpl()
         return testProxy<TestOps>(
                 testOpsImpl,
-                clientConfiguration = RPCClientConfiguration.default.copy(
+                clientConfiguration = RPCClientConfiguration.DEFAULT.copy(
                         reapInterval = 100.millis,
                         cacheConcurrencyLevel = 16
                 ),

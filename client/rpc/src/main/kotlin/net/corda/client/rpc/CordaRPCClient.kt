@@ -21,14 +21,14 @@ data class CordaRPCClientConfiguration(
         val connectionMaxRetryInterval: Duration
 ) {
     internal fun toRpcClientConfiguration(): RPCClientConfiguration {
-        return RPCClientConfiguration.default.copy(
+        return RPCClientConfiguration.DEFAULT.copy(
                 connectionMaxRetryInterval = connectionMaxRetryInterval
         )
     }
     companion object {
         @JvmStatic
         val default = CordaRPCClientConfiguration(
-                connectionMaxRetryInterval = RPCClientConfiguration.default.connectionMaxRetryInterval
+                connectionMaxRetryInterval = RPCClientConfiguration.DEFAULT.connectionMaxRetryInterval
         )
     }
 }
@@ -57,9 +57,5 @@ class CordaRPCClient(
 
     fun start(username: String, password: String): CordaRPCConnection {
         return CordaRPCConnection(rpcClient.start(CordaRPCOps::class.java, username, password))
-    }
-
-    inline fun <A> use(username: String, password: String, block: (CordaRPCConnection) -> A): A {
-        return start(username, password).use(block)
     }
 }

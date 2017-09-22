@@ -5,9 +5,9 @@ package net.corda.testing
 import net.corda.core.identity.Party
 import net.corda.core.internal.concurrent.transpose
 import net.corda.core.messaging.CordaRPCOps
-import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.node.services.transactions.ValidatingNotaryService
 import net.corda.nodeapi.User
+import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.testing.driver.DriverDSLExposedInterface
 
 //
@@ -25,7 +25,7 @@ class PredefinedTestNode internal constructor(party: Party, driver: DriverDSLExp
     val node by lazy { nodeFuture.get()!! }
     val rpc by lazy { node.rpcClientToNode() }
 
-    fun <R> useRPC(block: (CordaRPCOps) -> R) = rpc.use(rpcUsers[0].username, rpcUsers[0].password) { block(it.proxy) }
+    fun <R> useRPC(block: (CordaRPCOps) -> R) = rpc.start(rpcUsers[0].username, rpcUsers[0].password).use { block(it.proxy) }
 }
 
 // TODO: Probably we should inject the above keys through the driver to make the nodes use it, rather than have the warnings below.

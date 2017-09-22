@@ -48,12 +48,12 @@ private class TraderDemo {
         val role = options.valueOf(roleArg)!!
         if (role == Role.BANK) {
             val bankHost = NetworkHostAndPort("localhost", bankRpcPort)
-            CordaRPCClient(bankHost).use("demo", "demo") {
+            CordaRPCClient(bankHost).start("demo", "demo").use {
                 TraderDemoClientApi(it.proxy).runIssuer(1100.DOLLARS, buyerName, sellerName)
             }
         } else {
             val sellerHost = NetworkHostAndPort("localhost", sellerRpcPort)
-            CordaRPCClient(sellerHost).use("demo", "demo") {
+            CordaRPCClient(sellerHost).start("demo", "demo").use {
                 TraderDemoClientApi(it.proxy).runSeller(1000.DOLLARS, buyerName)
             }
         }

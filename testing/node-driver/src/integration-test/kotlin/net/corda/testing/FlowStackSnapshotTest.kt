@@ -206,7 +206,7 @@ class FlowStackSnapshotTest {
     fun `flowStackSnapshot contains full frames when methods with side effects are called`() {
         driver(startNodesInProcess = true) {
             val a = startNode(rpcUsers = listOf(User(Constants.USER, Constants.PASSWORD, setOf(startFlowPermission<SideEffectFlow>())))).get()
-            a.rpcClientToNode().use(Constants.USER, Constants.PASSWORD) { connection ->
+            a.rpcClientToNode().start(Constants.USER, Constants.PASSWORD).use { connection ->
                 val stackSnapshotFrames = connection.proxy.startFlow(::SideEffectFlow).returnValue.get()
                 val iterator = stackSnapshotFrames.listIterator()
                 assertFrame("run", false, iterator.next())
@@ -221,7 +221,7 @@ class FlowStackSnapshotTest {
     fun `flowStackSnapshot contains empty frames when methods with no side effects are called`() {
         driver(startNodesInProcess = true) {
             val a = startNode(rpcUsers = listOf(User(Constants.USER, Constants.PASSWORD, setOf(startFlowPermission<NoSideEffectFlow>())))).get()
-            a.rpcClientToNode().use(Constants.USER, Constants.PASSWORD) { connection ->
+            a.rpcClientToNode().start(Constants.USER, Constants.PASSWORD).use { connection ->
                 val stackSnapshotFrames = connection.proxy.startFlow(::NoSideEffectFlow).returnValue.get()
                 val iterator = stackSnapshotFrames.listIterator()
                 assertFrame("run", false, iterator.next())
@@ -237,7 +237,7 @@ class FlowStackSnapshotTest {
         driver(startNodesInProcess = true) {
             val a = startNode(rpcUsers = listOf(User(Constants.USER, Constants.PASSWORD, setOf(startFlowPermission<PersistingNoSideEffectFlow>())))).get()
 
-            a.rpcClientToNode().use(Constants.USER, Constants.PASSWORD) { connection ->
+            a.rpcClientToNode().start(Constants.USER, Constants.PASSWORD).use { connection ->
                 val flowId = connection.proxy.startFlow(::PersistingNoSideEffectFlow).returnValue.get()
                 val snapshotFromFile = readFlowStackSnapshotFromDir(a.configuration.baseDirectory, flowId)
                 val stackSnapshotFrames = convertToStackSnapshotFrames(snapshotFromFile)
@@ -254,7 +254,7 @@ class FlowStackSnapshotTest {
         driver(startNodesInProcess = true) {
             val a = startNode(rpcUsers = listOf(User(Constants.USER, Constants.PASSWORD, setOf(startFlowPermission<MultiplePersistingSideEffectFlow>())))).get()
 
-            a.rpcClientToNode().use(Constants.USER, Constants.PASSWORD) { connection ->
+            a.rpcClientToNode().start(Constants.USER, Constants.PASSWORD).use { connection ->
                 val numberOfFlowSnapshots = 5
                 val flowId = connection.proxy.startFlow(::MultiplePersistingSideEffectFlow, 5).returnValue.get()
                 val fileCount = countFilesInDir(a.configuration.baseDirectory, flowId)
@@ -268,7 +268,7 @@ class FlowStackSnapshotTest {
         driver(startNodesInProcess = true) {
             val a = startNode(rpcUsers = listOf(User(Constants.USER, Constants.PASSWORD, setOf(startFlowPermission<PersistingSideEffectFlow>())))).get()
 
-            a.rpcClientToNode().use(Constants.USER, Constants.PASSWORD) { connection ->
+            a.rpcClientToNode().start(Constants.USER, Constants.PASSWORD).use { connection ->
                 val flowId = connection.proxy.startFlow(::PersistingSideEffectFlow).returnValue.get()
                 val snapshotFromFile = readFlowStackSnapshotFromDir(a.configuration.baseDirectory, flowId)
                 var inCallCount = 0
