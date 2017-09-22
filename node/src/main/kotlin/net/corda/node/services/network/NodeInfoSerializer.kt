@@ -103,12 +103,12 @@ class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Sche
         // This can happen and it simply means that there are no events.
         if (watchKey == null) return result
 
-        logger.info("something :(")
+
         for (event in watchKey.pollEvents()) {
             val kind = event.kind()
             if (kind == StandardWatchEventKinds.OVERFLOW) continue
 
-            @Suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST")  // The actual type of these events is determined by event kinds we register for.
             val ev = event as WatchEvent<Path>
             val filename = ev.context()
             val absolutePath = nodeInfoDirectory.resolve(filename)
