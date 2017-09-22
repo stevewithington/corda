@@ -83,19 +83,19 @@ class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Sche
     }
 
     /**
-     * Starts polling the node info folder, for each new/modified file [callback] will be invoked.
-     * There is no guarantee that the callback is invoked only once per file.
-     *
+     * @return an [Observable] returning new [NodeInfo]s, there is no guarantee that the same value isn't returned more
+     *      than once.
      */
-    fun pollDirectory() : Observable<NodeInfo> {
+    fun directoryObservable() : Observable<NodeInfo> {
         return Observable.interval(5, TimeUnit.SECONDS, scheduler)
-                .flatMapIterable { _ -> pollWatch() }
+                .flatMapIterable { pollWatch() }
     }
 
     // Polls the watchService for changes to [nodeInfoDirectory], invoke [callback] for
     // each new/modified entry.
     private fun pollWatch() : List<NodeInfo> {
         val result = ArrayList<NodeInfo>()
+        val files = ArrayList<File>()
         if (watchService == null)
             return result
 
@@ -113,14 +113,16 @@ class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Sche
             val filename = ev.context()
             val absolutePath = nodeInfoDirectory.resolve(filename)
             if (absolutePath.isRegularFile()) {
-                processFile(absolutePath.toFile())?.let { result.add(it) }
+                files.add(absolutePath.toFile())
             }
         }
         val valid = watchKey.reset()
         if (!valid) {
             logger.warn("Can't poll $nodeInfoDirectory anymore, it was probably deleted.")
         }
-        return result
+        return files.distinct()
+                .map { processFile(it) }
+                .filterNotNull()
     }
 
     private fun processFile(file :File) : NodeInfo? {

@@ -6,6 +6,7 @@ import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.internal.VisibleForTesting
+import net.corda.core.internal.bufferUntilSubscribed
 import net.corda.core.internal.concurrent.map
 import net.corda.core.internal.concurrent.openFuture
 import net.corda.core.messaging.DataFeed
@@ -93,7 +94,7 @@ open class PersistentNetworkMapCache(private val serviceHub: ServiceHubInternal)
             addNode(node)
         }
 
-        nodeInfoSerializer.pollDirectory().subscribe { node -> addNode(node)}
+        nodeInfoSerializer.directoryObservable().subscribe { node -> addNode(node)}
     }
 
     override fun getPartyInfo(party: Party): PartyInfo? {

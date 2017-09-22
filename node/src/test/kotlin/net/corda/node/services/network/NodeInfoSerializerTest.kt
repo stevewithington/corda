@@ -4,24 +4,20 @@ import net.corda.core.internal.copyToDirectory
 import net.corda.core.internal.div
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.KeyManagementService
-import net.corda.core.utilities.loggerFor
 import net.corda.node.services.identity.InMemoryIdentityService
 import net.corda.testing.*
 import net.corda.testing.node.MockKeyManagementService
 import net.corda.testing.node.NodeBasedTest
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.filefilter.DirectoryFileFilter
 import org.apache.commons.io.filefilter.FileFilterUtils
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import rx.observers.TestSubscriber
-import rx.schedulers.Schedulers
 import rx.schedulers.TestScheduler
 
 import java.nio.charset.Charset
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -83,7 +79,7 @@ class NodeInfoSerializerTest : NodeBasedTest() {
         (folder.root.toPath() / NodeInfoSerializer.NODE_INFO_FOLDER).toFile().mkdirs()
 
         // Start polling with an empty folder.
-        nodeInfoSerializer.pollDirectory()
+        nodeInfoSerializer.directoryObservable()
                 .subscribe(testSubscriber)
         // Ensure the watch service is started.
         scheduler.advanceTimeBy(1, TimeUnit.HOURS)
