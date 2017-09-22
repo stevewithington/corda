@@ -2,6 +2,7 @@ package net.corda.node.services.network
 
 import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.SignedData
+import net.corda.core.internal.VisibleForTesting
 import net.corda.core.internal.div
 import net.corda.core.internal.isDirectory
 import net.corda.core.internal.isRegularFile
@@ -13,6 +14,8 @@ import net.corda.core.serialization.serialize
 import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.loggerFor
 import rx.Observable
+import rx.Scheduler
+import rx.schedulers.Schedulers
 import java.io.File
 import java.nio.file.*
 import java.util.concurrent.TimeUnit
@@ -20,10 +23,11 @@ import java.util.concurrent.TimeUnit
 /**
  * Class containing the logic to serialize and de-serialize a [NodeInfo] to disk and reading them back.
  */
-class NodeInfoSerializer(val nodePath: Path) {
+class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Scheduler = Schedulers.computation()) {
 
+    @VisibleForTesting
     val nodeInfoDirectory = nodePath / NodeInfoSerializer.NODE_INFO_FOLDER
-    val watchService : WatchService? by lazy { initWatch() }
+    private val watchService : WatchService? by lazy { initWatch() }
 
     companion object {
         /**
@@ -69,8 +73,10 @@ class NodeInfoSerializer(val nodePath: Path) {
         }
         var readFiles = 0
         for (file in nodeInfoDirectory.toFile().walk().maxDepth(1)) if (file.isFile) {
-            processFile(file) { nodeInfo -> result.add(nodeInfo) }
-            readFiles++
+            processFile(file)?.let {
+                result.add(it)
+                readFiles++
+            }
         }
         logger.info("Succesfully read $readFiles NodeInfo files.")
         return result
@@ -80,53 +86,53 @@ class NodeInfoSerializer(val nodePath: Path) {
      * Starts polling the node info folder, for each new/modified file [callback] will be invoked.
      * There is no guarantee that the callback is invoked only once per file.
      *
-     * @param callback a callback which will be invoked on any new/modified file in [nodeInfoDirectory]
      */
-    fun pollDirectory(callback: (NodeInfo) -> Unit) {
-        Observable.interval(5, TimeUnit.SECONDS)
-                .subscribe({ pollWatch { file -> processFile(file, callback) }})
+    fun pollDirectory() : Observable<NodeInfo> {
+        return Observable.interval(5, TimeUnit.SECONDS, scheduler)
+                .flatMapIterable { _ -> pollWatch() }
     }
 
-    private fun pollWatch(callback : (File) -> Unit) {
-        if (watchService == null) {
-            logger.warn("Can't watch no service :(")
-            return
-        }
+    // Polls the watchService for changes to [nodeInfoDirectory], invoke [callback] for
+    // each new/modified entry.
+    private fun pollWatch() : List<NodeInfo> {
+        val result = ArrayList<NodeInfo>()
+        if (watchService == null)
+            return result
 
         val watchKey: WatchKey? = watchService!!.poll()
         // This can happen and it simply means that there are no events.
-        if (watchKey == null) return
+        if (watchKey == null) return result
 
+        logger.info("something :(")
         for (event in watchKey.pollEvents()) {
             val kind = event.kind()
             if (kind == StandardWatchEventKinds.OVERFLOW) continue
 
+            @Suppress("UNCHECKED_CAST")
             val ev = event as WatchEvent<Path>
             val filename = ev.context()
             val absolutePath = nodeInfoDirectory.resolve(filename)
             if (absolutePath.isRegularFile()) {
-                callback(absolutePath.toFile())
+                processFile(absolutePath.toFile())?.let { result.add(it) }
             }
         }
         val valid = watchKey.reset()
         if (!valid) {
             logger.warn("Can't poll $nodeInfoDirectory anymore, it was probably deleted.")
         }
+        return result
     }
 
-    private fun loadFromFile(file: File): NodeInfo {
-        val signedData: SignedData<NodeInfo> = ByteSequence.of(file.readBytes()).deserialize()
-        return signedData.verified()
-    }
-
-    private fun processFile(file :File, callback: (NodeInfo) -> Unit) {
+    private fun processFile(file :File) : NodeInfo? {
         try {
             logger.info("Reading NodeInfo from file: $file")
-            val nodeInfo = loadFromFile(file)
-            callback(nodeInfo)
+            val signedData: SignedData<NodeInfo> = ByteSequence.of(file.readBytes()).deserialize()
+            val nodeInfo = signedData.verified()
+            return nodeInfo
         } catch (e: Exception) {
-            logger.error("Exception parsing NodeInfo from file. $file: $e")
+            logger.warn("Exception parsing NodeInfo from file. $file: $e")
             e.printStackTrace()
+            return null
         }
     }
 
@@ -142,5 +148,4 @@ class NodeInfoSerializer(val nodePath: Path) {
         logger.info("Watching $nodeInfoDirectory for new files")
         return watchService
     }
-
 }

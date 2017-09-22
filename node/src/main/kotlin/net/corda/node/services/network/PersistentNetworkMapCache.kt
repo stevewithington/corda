@@ -93,9 +93,7 @@ open class PersistentNetworkMapCache(private val serviceHub: ServiceHubInternal)
             addNode(node)
         }
 
-        nodeInfoSerializer.pollDirectory{ node ->
-            addNode(node)
-        }
+        nodeInfoSerializer.pollDirectory().subscribe { node -> addNode(node)}
     }
 
     override fun getPartyInfo(party: Party): PartyInfo? {
