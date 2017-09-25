@@ -49,6 +49,11 @@ class CordappLoader private constructor(private val cordappJarPaths: List<URL>) 
         private val logger = loggerFor<CordappLoader>()
 
         /**
+         * Cordapp directory name
+         */
+        val CORDAPPS_DIR_NAME = "cordapps"
+
+        /**
          * Creates a default CordappLoader intended to be used in non-dev or non-test environments.
          *
          * @param baseDir The directory that this node is running in. Will use this to resolve the plugins directory
@@ -61,7 +66,7 @@ class CordappLoader private constructor(private val cordappJarPaths: List<URL>) 
             })
         }
 
-        fun getPluginsPath(baseDir: Path): Path = baseDir / "plugins"
+        fun getPluginsPath(baseDir: Path): Path = baseDir / CORDAPPS_DIR_NAME
 
         /**
          * Create a dev mode CordappLoader for test environments

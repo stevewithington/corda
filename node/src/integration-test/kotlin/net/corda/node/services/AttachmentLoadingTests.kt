@@ -74,7 +74,7 @@ class AttachmentLoadingTests : TestDependencyInjectionBase() {
             val bankAName = CordaX500Name("BankA", "Zurich", "CH")
             val bankBName = CordaX500Name("BankB", "Zurich", "CH")
             // Copy the app jar to the first node. The second won't have it.
-            val path = (baseDirectory(bankAName.toString()) / "plugins").createDirectories() / "isolated.jar"
+            val path = (baseDirectory(bankAName.toString()) / CordappLoader.CORDAPPS_DIR_NAME).createDirectories() / "isolated.jar"
             isolatedJAR.openStream().buffered().use { input ->
                 Files.newOutputStream(path).buffered().use { output ->
                     input.copyTo(output)
