@@ -17,13 +17,24 @@ import rx.Observable
 import rx.Scheduler
 import rx.schedulers.Schedulers
 import java.io.File
-import java.nio.file.*
+import java.nio.file.Path
+import java.nio.file.StandardWatchEventKinds
+import java.nio.file.WatchEvent
+import java.nio.file.WatchKey
+import java.nio.file.WatchService
 import java.util.concurrent.TimeUnit
 
 /**
- * Class containing the logic to serialize and de-serialize a [NodeInfo] to disk and reading them back.
+ * Class containing the logic to
+ * - Serialize and de-serialize a [NodeInfo] to disk and reading them back.
+ * - Poll a directory for new serialized [NodeInfo]
+ *
+ * @param path the base path of a node.
+ * @param scheduler a [Scheduler] for the rx [Observable] returned by [directoryObservable], this is mainly useful for
+ *        testing.
  */
-class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Scheduler = Schedulers.computation()) {
+class NodeInfoSerializer(private val nodePath: Path,
+                         private val scheduler: Scheduler = Schedulers.computation()) {
 
     @VisibleForTesting
     val nodeInfoDirectory = nodePath / NodeInfoSerializer.NODE_INFO_FOLDER
@@ -78,7 +89,7 @@ class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Sche
                 readFiles++
             }
         }
-        logger.info("Succesfully read $readFiles NodeInfo files.")
+        logger.info("Successfully read $readFiles NodeInfo files.")
         return result
     }
 
@@ -91,8 +102,7 @@ class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Sche
                 .flatMapIterable { pollWatch() }
     }
 
-    // Polls the watchService for changes to [nodeInfoDirectory], invoke [callback] for
-    // each new/modified entry.
+    // Polls the watchService for changes to nodeInfoDirectory, return all the newly read NodeInfos.
     private fun pollWatch() : List<NodeInfo> {
         val result = ArrayList<NodeInfo>()
         val files = ArrayList<File>()
@@ -100,9 +110,8 @@ class NodeInfoSerializer(private val nodePath: Path, private val scheduler: Sche
             return result
 
         val watchKey: WatchKey? = watchService!!.poll()
-        // This can happen and it simply means that there are no events.
+        // This can happen and it means that there are no events.
         if (watchKey == null) return result
-
 
         for (event in watchKey.pollEvents()) {
             val kind = event.kind()

@@ -18,6 +18,7 @@ UNRELEASED
    ``NetworkMapCache::notaryIdentities`` list to enable to lookup for notary parties known to the network. Related ``CordaRPCOps::notaryIdentities``
    was introduced. Other special nodes parties like Oracles or Regulators need to be specified directly in CorDapp or flow.
   * Moved ``ServiceType`` and ``ServiceInfo`` to ``net.corda.nodeapi`` package as services are only required on node startup.
+  * Nodes now poll the filesystem for new serialized ``NodeInfo`` in the ``additional-node-info`` directory.
 
 * ``Cordformation`` and node identity generation
   * Cordform may not specify a ``NetworkMapNode``, when that happens during ``DeployNodes`` the following happens:
