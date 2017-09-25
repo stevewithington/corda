@@ -7,6 +7,8 @@ from the previous milestone release.
 UNRELEASED
 ----------
 
+* Renamed "plugins" directory on nodes to "cordapps"
+
 Release 1.0
 -----------
 
