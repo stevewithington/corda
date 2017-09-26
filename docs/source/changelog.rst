@@ -9,6 +9,9 @@ UNRELEASED
 
 * ``Cordapp`` now has a name field for identifying CorDapps and all CorDapp names are printed to console at startup.
 
+* Change the Class Carpenter to respect the whitelist applied to it's factories context. Any element of a carpenter schema must be either
+  whitlisted or annotated as CordaSerializable otherwise it will reject the schema and refuse to carpent the object
+
 Release 1.0
 -----------
 
