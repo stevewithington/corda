@@ -34,12 +34,16 @@ data class CordaRPCClientConfiguration(
 }
 
 /** @see RPCClient */
-class CordaRPCClient(
-        hostAndPort: NetworkHostAndPort,
-        sslConfiguration: SSLConfiguration? = null,
-        configuration: CordaRPCClientConfiguration = CordaRPCClientConfiguration.default,
-        initialiseSerialization: Boolean = true
+class CordaRPCClient
+private constructor(hostAndPort: NetworkHostAndPort,
+                    sslConfiguration: SSLConfiguration? = null,
+                    configuration: CordaRPCClientConfiguration = CordaRPCClientConfiguration.default,
+                    initialiseSerialization: Boolean = true
 ) {
+    constructor(hostAndPort: NetworkHostAndPort) : this(hostAndPort, sslConfiguration = null)
+    constructor(hostAndPort: NetworkHostAndPort, configuration: CordaRPCClientConfiguration) :
+            this(hostAndPort, sslConfiguration = null, configuration = configuration)
+
     init {
         // Init serialization.  It's plausible there are multiple clients in a single JVM, so be tolerant of
         // others having registered first.
@@ -61,5 +65,15 @@ class CordaRPCClient(
 
     inline fun <A> use(username: String, password: String, block: (CordaRPCConnection) -> A): A {
         return start(username, password).use(block)
+    }
+
+    companion object {
+        // This is workaround for making the default c'tor internal
+        internal fun bridgeCordaRPCClient(hostAndPort: NetworkHostAndPort,
+                                          sslConfiguration: SSLConfiguration? = null,
+                                          configuration: CordaRPCClientConfiguration = CordaRPCClientConfiguration.default,
+                                          initialiseSerialization: Boolean = true): CordaRPCClient {
+            return CordaRPCClient(hostAndPort, sslConfiguration, configuration, initialiseSerialization)
+        }
     }
 }

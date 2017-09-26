@@ -1,6 +1,6 @@
 package net.corda.traderdemo
 
-import net.corda.client.rpc.CordaRPCClient
+import net.corda.client.rpc.internal.internalCordaRPCClient
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.millis
 import net.corda.finance.DOLLARS
@@ -10,13 +10,11 @@ import net.corda.finance.schemas.CashSchemaV1
 import net.corda.finance.schemas.CommercialPaperSchemaV1
 import net.corda.node.services.FlowPermissions.Companion.startFlowPermission
 import net.corda.node.services.transactions.SimpleNotaryService
-import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.nodeapi.User
+import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.testing.*
 import net.corda.testing.driver.poll
 import net.corda.testing.node.NodeBasedTest
-import net.corda.testing.setCordappPackages
-import net.corda.testing.unsetCordappPackages
 import net.corda.traderdemo.flow.BuyerFlow
 import net.corda.traderdemo.flow.CommercialPaperIssueFlow
 import net.corda.traderdemo.flow.SellerFlow
@@ -56,11 +54,11 @@ class TraderDemoTest : NodeBasedTest() {
         nodeB.internals.registerCustomSchemas(setOf(CashSchemaV1, CommercialPaperSchemaV1))
 
         val (nodeARpc, nodeBRpc) = listOf(nodeA, nodeB).map {
-            val client = CordaRPCClient(it.internals.configuration.rpcAddress!!, initialiseSerialization = false)
+            val client = internalCordaRPCClient(it.internals.configuration.rpcAddress!!, initialiseSerialization = false)
             client.start(demoUser.username, demoUser.password).proxy
         }
         val nodeBankRpc = let {
-            val client = CordaRPCClient(bankNode.internals.configuration.rpcAddress!!, initialiseSerialization = false)
+            val client = internalCordaRPCClient(bankNode.internals.configuration.rpcAddress!!, initialiseSerialization = false)
             client.start(bankUser.username, bankUser.password).proxy
         }
 

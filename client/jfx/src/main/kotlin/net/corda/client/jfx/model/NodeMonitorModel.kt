@@ -1,8 +1,8 @@
 package net.corda.client.jfx.model
 
 import javafx.beans.property.SimpleObjectProperty
-import net.corda.client.rpc.CordaRPCClient
 import net.corda.client.rpc.CordaRPCClientConfiguration
+import net.corda.client.rpc.internal.internalCordaRPCClient
 import net.corda.core.contracts.ContractState
 import net.corda.core.flows.StateMachineRunId
 import net.corda.core.identity.Party
@@ -56,7 +56,7 @@ class NodeMonitorModel {
      * TODO provide an unsubscribe mechanism
      */
     fun register(nodeHostAndPort: NetworkHostAndPort, username: String, password: String, initialiseSerialization: Boolean = true) {
-        val client = CordaRPCClient(
+        val client = internalCordaRPCClient(
                 hostAndPort = nodeHostAndPort,
                 configuration = CordaRPCClientConfiguration.default.copy(
                         connectionMaxRetryInterval = 10.seconds

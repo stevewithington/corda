@@ -1,5 +1,6 @@
 package net.corda.client.rpc;
 
+import net.corda.client.rpc.internal.InternalCordaRPCClientKt;
 import net.corda.client.rpc.internal.RPCClient;
 import net.corda.core.concurrent.CordaFuture;
 import net.corda.core.contracts.Amount;
@@ -57,7 +58,7 @@ public class CordaRPCJavaClientTest extends NodeBasedTest {
         CordaFuture<StartedNode<Node>> nodeFuture = startNode(getALICE().getName(), 1, services, singletonList(rpcUser), emptyMap());
         node = nodeFuture.get();
         node.getInternals().registerCustomSchemas(Collections.singleton(CashSchemaV1.INSTANCE));
-        client = new CordaRPCClient(requireNonNull(node.getInternals().getConfiguration().getRpcAddress()), null, getDefault(), false);
+        client = InternalCordaRPCClientKt.internalCordaRPCClient(requireNonNull(node.getInternals().getConfiguration().getRpcAddress()), null, getDefault(), false);
     }
 
     @After

@@ -1,5 +1,6 @@
 package net.corda.client.rpc
 
+import net.corda.client.rpc.internal.internalCordaRPCClient
 import net.corda.core.crypto.random63BitValue
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.messaging.FlowProgressHandle
@@ -19,9 +20,9 @@ import net.corda.finance.schemas.CashSchemaV1
 import net.corda.node.internal.Node
 import net.corda.node.internal.StartedNode
 import net.corda.node.services.FlowPermissions.Companion.startFlowPermission
-import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.node.services.transactions.ValidatingNotaryService
 import net.corda.nodeapi.User
+import net.corda.nodeapi.internal.ServiceInfo
 import net.corda.testing.ALICE
 import net.corda.testing.chooseIdentity
 import net.corda.testing.node.NodeBasedTest
@@ -54,7 +55,7 @@ class CordaRPCClientTest : NodeBasedTest() {
         setCordappPackages("net.corda.finance.contracts")
         node = startNode(ALICE.name, rpcUsers = listOf(rpcUser), advertisedServices = setOf(ServiceInfo(ValidatingNotaryService.type))).getOrThrow()
         node.internals.registerCustomSchemas(setOf(CashSchemaV1))
-        client = CordaRPCClient(node.internals.configuration.rpcAddress!!, initialiseSerialization = false)
+        client = internalCordaRPCClient(node.internals.configuration.rpcAddress!!, initialiseSerialization = false)
     }
 
     @After
